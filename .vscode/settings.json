@@ -13,7 +13,7 @@
   "latex-workshop.latex.tools": [
     {
       "name": "latexmk",
-      "command": "latexmk",
+      "command": "D:/latex/texlive/2026/bin/windows/latexmk.exe",
       "args": [
         "-pdf",
         "-interaction=nonstopmode",
