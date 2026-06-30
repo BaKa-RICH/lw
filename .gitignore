@@ -19,3 +19,11 @@
 *.gz
 .DS_Store
 Thumbs.db
+
+# External project-local Codex skills
+/.agents/skills/_sources/
+/.agents/skills/paper-spine*/
+/.agents/skills/academic-research-suite/
+
+# PaperSpine working outputs
+/paper_rewriting_output/

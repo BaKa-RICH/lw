@@ -1,0 +1,10 @@
+# Table I. Candidate Gap Evaluation and Selection
+
+| Gap | Interval | G_i | Delta | Capacity f/r | Adjustment f/r | C_coop | C_ego | J | Decision | Raw row source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| gap1 | [-180, -90] | 90.0 | 0.0 | 20/100 | 0/0 | 0.0 | 233.29570101767567 | 233.29570101767567 | feasible | D:\PycharmProjects\CORMC\artifacts\icus论文实验 raw artifacts\shared_runs\icus_v1\one_step\S01\gap_rows.csv#gap1 |
+| gap2 | [-90, -25] | 65.0 | 20.0 | 10/45 | 0/20 | 88.55093980328955 | 164.96497221126782 | 182.67516017192574 | feasible | D:\PycharmProjects\CORMC\artifacts\icus论文实验 raw artifacts\shared_runs\icus_v1\one_step\S01\gap_rows.csv#gap2 |
+| gap3 | [-25, 30] | 55.0 | 30.0 | 35/20 | 28.9906772352/1.0093227648 | 869.7203170561419 | 81.53782030130176 | 255.48188371253016 | feasible | D:\PycharmProjects\CORMC\artifacts\icus论文实验 raw artifacts\shared_runs\icus_v1\one_step\S01\gap_rows.csv#gap3 |
+| gap4 | [30, 110] | 80.0 | 5.0 | 35/10 | 5/0 | 25.0 | 171.80832649151614 | 176.80832649151614 | selected | D:\PycharmProjects\CORMC\artifacts\icus论文实验 raw artifacts\shared_runs\icus_v1\one_step\S01\gap_rows.csv#gap4 |
+| gap5 | [110, 190] | 80.0 | 5.0 | 15/35 | 0/5 | 25.0 | 294.19392319074524 | 299.19392319074524 | feasible | D:\PycharmProjects\CORMC\artifacts\icus论文实验 raw artifacts\shared_runs\icus_v1\one_step\S01\gap_rows.csv#gap5 |
+| gap6 | [190, 250] | 60.0 |  | / | / |  |  |  | infeasible: unreachable | D:\PycharmProjects\CORMC\artifacts\icus论文实验 raw artifacts\shared_runs\icus_v1\one_step\S01\gap_rows.csv#gap6 |

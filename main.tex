@@ -14,7 +14,7 @@
 
 \begin{document}
 
-\title{Your Paper Title Here}
+\title{Mainline-Disturbance-Aware Cooperative Gap Development for On-Ramp Merging}
 
 \author{
 \IEEEauthorblockN{First Author}
@@ -28,19 +28,117 @@ email@example.com
 \maketitle
 
 \begin{abstract}
-This is a placeholder abstract. Replace it with a concise summary of your
-problem, method, key results, and contribution.
+On-ramp merging with connected and automated vehicles is often formulated as
+cooperative sequencing or trajectory planning, but a candidate gap may require
+non-negligible mainline cooperation before it becomes safe. This paper proposes
+a mainline-disturbance-aware cooperative gap development method for a local
+single merging-vehicle (MV) decision. Candidate gaps are evaluated as
+developable resources rather than static openings. For each gap, the available
+forward and backward boundary-vehicle cooperation is bounded by adjacent-gap
+safety margins, and a space-sensitive weighted quadratic adjustment estimates
+the minimum necessary cooperation to satisfy the required merging gap. The
+developed candidate is then scored by combining mainline cooperation cost and
+MV ego merging cost, and the selected gap is converted into terminal time,
+merging position, and a closed-form fifth-order feasible trajectory.
+Experiments validate three aspects: the full chain selects an executable
+developed gap in a representative case; ablation cases show no unnecessary
+cooperation and adjustment allocation toward the boundary side with larger
+residual margin; and representative successful-merging comparisons with a FIFO
+cooperative baseline reduce affected mainline vehicles from 3--6 to 0--2,
+lower mainline acceleration energy in all reported cases, and shorten recovery
+time from 20.75--36.75~s to 0--13.10~s. These results support low-disturbance
+local gap development rather than global traffic optimality.
 \end{abstract}
 
 \begin{IEEEkeywords}
-keyword one, keyword two, keyword three, keyword four
+On-ramp merging, connected and automated vehicles, cooperative gap development,
+mainline disturbance, trajectory planning.
 \end{IEEEkeywords}
 
 \section{Introduction}
-The introduction will be completed after the citation support bank and the
-compact related-work argument are finalized. A temporary placeholder citation
-is retained only to keep the BibTeX build valid before verified references are
-added \cite{placeholder_article}.
+On-ramp merging is a typical conflict point where a ramp vehicle must enter a
+mainline traffic stream while mainline vehicles attempt to preserve speed and
+spacing. Connected and automated vehicles (CAVs) make it possible to coordinate
+the merging vehicle (MV) and nearby mainline vehicles more actively than in
+human-driven traffic. However, the essential question is not only whether the MV
+can enter a gap. A safe merge may require the mainline traffic to create or
+enlarge that gap, and this cooperation consumes boundary-vehicle motion,
+neighboring spacing, and potentially the speed stability of following traffic.
+Thus, mainline cooperation should not be treated as a free resource.
+
+Cooperative merging and sequencing for CAVs have been widely studied. Surveys
+and representative controllers have formulated the merging area as a coordinated
+control zone, often assigning a passing order and optimizing vehicle motion to
+improve safety, fuel use, or travel efficiency
+\cite{riosTorres2017survey,riosTorres2017automated}. Further studies optimize
+the merging sequence through game-theoretic or integrated sequence-trajectory
+frameworks \cite{jing2019cooperative,chen2024integrated}. These approaches show
+the value of coordination, but they typically regard mainline vehicles as
+coordinated resources after the merging order or target interaction structure
+has been specified. As a result, the local cost of developing each candidate gap
+is not always the central object of valuation.
+
+Trajectory-optimization methods provide another important line of work. They
+can generate smooth, safe, or energy-efficient trajectories for automated
+merging under speed, acceleration, collision-avoidance, and terminal constraints
+\cite{ntousakis2016optimal,karimi2020cooperative}. Some recent formulations
+also allow flexible merging positions or combine sequence generation with
+trajectory planning \cite{tang2022hierarchical,chen2024integrated}. Such methods
+are effective once a terminal gap, sequence, or interaction target is known, but
+they do not by themselves answer how much bounded mainline cooperation is needed
+to turn a spatially insufficient candidate gap into a safe merging gap.
+
+Work on gap creation and gap development is closer to this issue. Earlier
+reviews discussed intelligent-vehicle concepts for facilitating motorway
+on-ramp merging \cite{scarinci2014control}, and state-constrained optimal
+control has explicitly considered automated merging and gap development with
+speed constraints \cite{zhou2018automated}. More recently, the congestion caused
+by gap creation for ramp vehicles has been studied as a mainline-side effect
+\cite{zhou2024congestion}. These studies indicate that facilitating vehicles can
+pay a nontrivial cost when a gap is created. A remaining missing link is to
+connect this observation to a compact candidate-gap evaluation chain: the
+available cooperation of the boundary vehicles should be bounded by neighboring
+gap safety margins, the required gap shortage should be allocated with minimum
+disturbance, and the developed candidates should be compared through a joint
+valuation of mainline cooperation and MV merging efficiency.
+
+This paper reframes local on-ramp merging as a
+mainline-disturbance-aware cooperative gap development problem. At a merging
+decision instant, each candidate gap is treated as a developable traffic
+resource rather than a static object selected only by its current length,
+distance, or ego trajectory cost. For each candidate gap, the planner first
+computes how much the front and rear boundary vehicles can safely contribute
+without compressing adjacent gaps below a safety margin. It then estimates the
+minimum necessary boundary-vehicle adjustment through a space-sensitive
+quadratic cost. The resulting cooperation cost is combined with the MV ego cost
+to select the best developed gap, which is finally converted into a merging
+time, merging location, and feasible trajectory.
+
+The main contributions are summarized as follows:
+\begin{itemize}
+    \item A mainline-disturbance-aware cooperative gap development formulation
+    is introduced for on-ramp merging, where candidate gaps are evaluated by the
+    bounded and costly cooperation required from their boundary vehicles rather
+    than by static gap size alone.
+    \item An adjacent-gap-preserving cooperation capacity model and a
+    space-sensitive minimum-disturbance adjustment are developed to estimate the
+    minimum necessary cooperation for each candidate gap under neighboring-gap
+    safety margins.
+    \item A disturbance-efficiency valuation and selected-gap execution chain
+    are proposed to select the best developed gap and convert it into terminal
+    time, terminal location, and a closed-form feasible MV trajectory.
+\end{itemize}
+
+The experiments are organized around three levels of evidence. First, a
+feasibility case demonstrates the closed chain from candidate-gap evaluation to
+selected developed-gap trajectory execution. Second, compact ablation cases
+examine whether the proposed capacity and adjustment mechanisms allocate
+cooperation according to neighboring-gap margins. Third, representative
+successful-merging cases compare the proposed method with a fixed-order,
+FIFO-style cooperative merging baseline based on Rios-Torres and Malikopoulos
+\cite{riosTorres2017automated}. The external comparison focuses on mainline
+disturbance reduction; the primary representative case additionally checks that
+the disturbance reduction can be achieved with comparable physical merge timing.
 
 \section{Problem Formulation}
 Consider a local on-ramp merging decision at a planning instant. The target
@@ -381,13 +479,237 @@ terminal time, terminal position, and feasible MV trajectory while maintaining
 the required developed gap length.
 
 \section{Experiments}
-The experiments section will be drafted after the S01 candidate evaluation
-table, capacity-ablation table, and representative FIFO comparison data are
-assembled.
+The experiments are designed to verify the proposed chain at three levels:
+candidate-gap feasibility, capacity-and-adjustment behavior, and external
+mainline disturbance relative to a FIFO baseline. All experiments use local
+single-MV merging configurations with the target-lane vehicles initially moving
+at \(v_{ref}=20~\mathrm{m/s}\). The safety parameters give
+\(G^{\mathrm{req}}=85~\mathrm{m}\) and
+\(G^{\mathrm{adj}}=45~\mathrm{m}\). The valuation weights are fixed as
+\(w_c=0.2\), \(w_e=1\), and \(w_t=10\) across all cases.
+
+\subsection{Experimental Setup}
+The proposed method, denoted as Proposed in the tables, evaluates all candidate
+mainline gaps, estimates the minimum necessary boundary-vehicle adjustment,
+selects the best developed gap according to \(J_i\), and then executes only the
+selected gap. The external baseline is a FIFO cooperative merging controller
+that organizes vehicles through a fixed-order and fixed-spacing rule. In the
+baseline logs, the physical merge-entry and merge-exit locations are
+\(x=555~\mathrm{m}\) and \(x=600~\mathrm{m}\), respectively. These locations
+are used to confirm that both methods complete the physical merge, but they are
+not used as the main performance metrics because the two methods optimize
+different objectives.
+
+The internal validation uses the quantities introduced in Sections II and III:
+\(\Delta_i\), \(\bar{\delta}_{f,i}/\bar{\delta}_{r,i}\),
+\(\delta_{f,i}^*/\delta_{r,i}^*\), \(C_i^{\mathrm{coop}}\),
+\(C_i^{\mathrm{ego}}\), and \(J_i\). The external comparison focuses on
+mainline disturbance: the number of affected mainline vehicles, mainline
+acceleration energy, and recovery time. Merge-point and spacing quantities are
+reported only as planning context because the FIFO baseline enforces a fixed
+merge-entry location and a fixed target spacing.
+
+\subsection{Feasibility Validation}
+The first experiment verifies that candidate-gap evaluation can be converted
+into an executable merge trajectory. The representative configuration uses
+\[
+    X=[-180,-90,-25,30,110,190,250]~\mathrm{m}.
+\]
+Table~\ref{tab:feasibility_eval} lists all candidate gaps. The selected row is
+not the largest current gap or the ego-only nearest option. Instead, gap 4 is
+selected because its small shortage can be developed by a local front-boundary
+adjustment while keeping the combined disturbance-efficiency score lower than
+the other candidates.
+
+\begin{table}[t]
+\caption{Candidate-Gap Evaluation and Selection}
+\label{tab:feasibility_eval}
+\centering
+\scriptsize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{c c c c c c c c c}
+\hline
+Gap & Interval (m) & \(G_i\) & \(\Delta_i\) & Cap. f/r & Adj. f/r & \(C_i^{\mathrm{coop}}\) & \(C_i^{\mathrm{ego}}\) & \(J_i\) \\
+\hline
+1 & \([-180,-90]\) & 90 & 0 & 20/100 & 0/0 & 0.00 & 233.30 & 233.30 \\
+2 & \([-90,-25]\) & 65 & 20 & 10/45 & 0/20 & 88.55 & 164.96 & 182.68 \\
+3 & \([-25,30]\) & 55 & 30 & 35/20 & 28.99/1.01 & 869.72 & 81.54 & 255.48 \\
+\textbf{4} & \(\mathbf{[30,110]}\) & \textbf{80} & \textbf{5} & \textbf{35/10} & \textbf{5/0} & \textbf{25.00} & \textbf{171.81} & \textbf{176.81} \\
+5 & \([110,190]\) & 80 & 5 & 15/35 & 0/5 & 25.00 & 294.19 & 299.19 \\
+6 & \([190,250]\) & 60 & -- & -- & -- & -- & -- & infeasible \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+For the selected developed gap, the estimated terminal quantities are
+\(d^*=72.5~\mathrm{m}\), \(t_m^*=13.594~\mathrm{s}\), and
+\(p_m^*=344.375~\mathrm{m}\). Fig.~\ref{fig:feasibility_traj} shows the
+resulting time-space trajectory. The MV reaches the developed gap center at the
+terminal time, while only the selected boundary vehicle is adjusted. This
+validates the closed chain from candidate-level estimation to selected-gap
+execution.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/feasibility_trajectory.png}
+\caption{Feasibility trajectory generated for the selected developed gap. The
+red curve denotes the MV trajectory, blue curves denote the selected boundary
+vehicles, and gray curves denote non-selected mainline vehicles.}
+\label{fig:feasibility_traj}
+\end{figure}
+
+\subsection{Capacity and Adjustment Ablation}
+The second experiment checks whether the adjacent-gap capacity and
+space-sensitive adjustment behave as intended. Four representative cases are
+constructed from the same evidence package. Table~\ref{tab:capacity_ablation}
+compares an equal split with the proposed weighted adjustment. The purpose is
+not to claim a global traffic optimum, but to verify the mechanism: no
+unnecessary cooperation is introduced when \(\Delta_i=0\), symmetric margins
+lead to symmetric adjustment, and asymmetric margins shift the adjustment burden
+toward the side with more residual neighboring space.
+
+\begin{table}[t]
+\caption{Capacity and Adjustment Ablation}
+\label{tab:capacity_ablation}
+\centering
+\scriptsize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{c c c c c c c}
+\hline
+Case & Selected gap (m) & \(\Delta_i\) & Cap. f/r & Equal f/r & Proposed f/r & Verified behavior \\
+\hline
+C1 & \([10,95]\) & 0 & 30/100 & 0/0 & 0/0 & no unnecessary cooperation \\
+C2 & \([-20,45]\) & 20 & 35/35 & 10/10 & 10/10 & symmetric allocation \\
+C3 & \([30,110]\) & 5 & 35/10 & 2.5/2.5 & 5/0 & front-side larger margin \\
+C4 & \([-20,60]\) & 5 & 10/35 & 2.5/2.5 & 0/5 & rear-side larger margin \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+The last two rows illustrate the role of the space-sensitive weights in
+(\ref{eq:gamma}). With a larger front-side capacity, the proposed solution moves
+the front boundary vehicle and avoids consuming the tighter rear-side margin.
+With a larger rear-side capacity, the adjustment is shifted to the rear
+boundary vehicle. Thus, the compact ablation validates the intended
+capacity-preserving behavior of the adjustment model.
+
+\subsection{Representative External Comparison with FIFO Baseline}
+The third experiment compares the proposed method with the FIFO baseline in
+five representative successful-merging cases. A key distinction is that the FIFO
+baseline is designed to organize vehicles according to a fixed order and a
+fixed target spacing. It may therefore accelerate or decelerate multiple
+mainline vehicles to form the prescribed spacing pattern. For this reason,
+entry time, exit time, minimum spacing, and minimum TTC are not used as the main
+cross-method comparison metrics in this section. The comparison instead asks
+whether successful merging can be achieved with less mainline cooperation.
+
+Table~\ref{tab:external_disturbance} shows the disturbance metrics. Across all
+five cases, the proposed method affects fewer mainline vehicles than the FIFO
+baseline. In Cases B and C, the selected developed gap requires no mainline
+adjustment, while FIFO still adjusts multiple mainline vehicles to satisfy its
+queue-spacing rule. In Cases A and E, the proposed method confines the
+cooperation to one boundary vehicle. Case D is the most demanding case for the
+proposed method, but it still reduces the affected mainline vehicles from five
+to two and shortens the recovery time from \(26.25~\mathrm{s}\) to
+\(5.30~\mathrm{s}\).
+
+\begin{table}[t]
+\caption{External Comparison on Mainline Disturbance}
+\label{tab:external_disturbance}
+\centering
+\scriptsize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{c c c c c}
+\hline
+Case & Method & Affected veh. & Acc. energy & Recovery time (s) \\
+\hline
+A & Proposed & 1 & 0.171 & 13.10 \\
+A & FIFO & 6 & 22.188 & 31.00 \\
+B & Proposed & 0 & 0.000 & 0.00 \\
+B & FIFO & 4 & 52.652 & 20.75 \\
+C & Proposed & 0 & 0.000 & 0.00 \\
+C & FIFO & 3 & 2.744 & 36.75 \\
+D & Proposed & 2 & 22.715 & 5.30 \\
+D & FIFO & 5 & 67.262 & 26.25 \\
+E & Proposed & 1 & 1.714 & 6.20 \\
+E & FIFO & 5 & 31.662 & 27.50 \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+Fig.~\ref{fig:external_time_space} visualizes one representative comparison.
+The proposed method develops and executes a local selected gap, whereas the
+FIFO baseline reorganizes a broader set of mainline vehicles according to its
+fixed-spacing logic. This figure is used to illustrate the difference in
+control mechanism rather than to compare physical entry or exit timing.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/external_time_space_comparison.png}
+\caption{Representative time-space comparison between the proposed method and
+the FIFO baseline. The red curve denotes the MV, and the mainline trajectories
+show that FIFO regulates a broader vehicle set to form its fixed-spacing queue.}
+\label{fig:external_time_space}
+\end{figure}
+
+Table~\ref{tab:merge_context} gives the corresponding planning context. The
+proposed method computes a selected-gap merging location from the developed gap,
+whereas the FIFO baseline uses the fixed physical merge-entry location in this
+experiment package. Similarly, the proposed method reports the resulting
+minimum spacing after selected-gap execution, while the FIFO value reflects its
+fixed spacing target. These quantities support the safety-feasibility
+interpretation, but they are not mixed with the disturbance metrics in
+Table~\ref{tab:external_disturbance}.
+
+\begin{table}[t]
+\caption{Merge-Placement and Spacing Context}
+\label{tab:merge_context}
+\centering
+\scriptsize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{c c c c}
+\hline
+Method & Merge-location treatment & Min. spacing treatment & Role \\
+\hline
+Proposed & computed \(p_m\) from selected gap, \(118.98\)--\(344.38~\mathrm{m}\) & observed \(55\)--\(85~\mathrm{m}\) & planning context \\
+FIFO & fixed physical entry, \(555~\mathrm{m}\) & fixed \(45~\mathrm{m}\) target & baseline setting \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+Overall, the external comparison supports a narrow claim: in representative
+successful-merging cases, evaluating developed gaps by the proposed
+disturbance-efficiency score can substantially reduce the range, intensity, and
+duration of mainline cooperation. The results do not imply that the method is
+an always-fastest merging controller or a global traffic optimizer.
 
 \section{Conclusion}
-The conclusion will be completed after the method and experimental evidence are
-fully aligned.
+This paper presented a mainline-disturbance-aware cooperative gap development
+method for local on-ramp merging. The central idea is that a candidate gap is
+not only selected from the current mainline traffic state, but can be developed
+through bounded and costly cooperation from its boundary vehicles. The proposed
+formulation first constrains boundary-vehicle contributions by adjacent-gap
+safety margins, then estimates the minimum necessary cooperation through a
+space-sensitive weighted quadratic adjustment, and finally selects the best
+developed gap by a disturbance-efficiency valuation. The selected gap is further
+converted into a merging time, merging location, and feasible fifth-order MV
+trajectory.
+
+The experiments support this chain at three levels. The feasibility case shows
+that candidate-gap evaluation can be closed into selected-gap trajectory
+execution. The capacity and adjustment ablation verifies that the method avoids
+unnecessary cooperation and shifts the adjustment burden toward the side with
+larger neighboring-gap margin. Representative comparisons with a FIFO
+cooperative merging baseline further show that the proposed method can reduce
+the number of affected mainline vehicles, mainline acceleration energy, and
+recovery time in successful-merging cases. These findings support the proposed
+method as a lightweight and interpretable local gap-development planner. Future
+work will extend the local longitudinal gap-development model to denser and
+mixed traffic conditions with rolling coordination and closed-loop simulation.
 
 \section*{Acknowledgment}
 If you do not need acknowledgments or funding information, you can delete this

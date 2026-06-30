@@ -1,0 +1,28 @@
+{
+  "excluded_scenarios": [
+    "S07 not run in this task",
+    "S05 not used for B"
+  ],
+  "notes": [
+    "B uses S01 only and traces candidate gap rows to the selected developed gap."
+  ],
+  "processed_outputs": [
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\B_feasibility_validation\\table_candidate_gap_evaluation_S01.csv",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\B_feasibility_validation\\table_candidate_gap_evaluation_S01.md",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\B_feasibility_validation\\report_B_feasibility_validation.md"
+  ],
+  "raw_sources": [
+    {
+      "path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\one_step\\S01\\gap_rows.csv",
+      "scenario_id": "S01",
+      "source_kind": "generated_one_step_evaluation"
+    },
+    {
+      "path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\one_step\\S01\\trajectory_with_acceleration.csv",
+      "scenario_id": "S01",
+      "source_kind": "generated_one_step_evaluation"
+    }
+  ],
+  "run_id": "icus_v1",
+  "section": "B_feasibility_validation"
+}

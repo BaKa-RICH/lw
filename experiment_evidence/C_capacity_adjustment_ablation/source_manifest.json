@@ -1,0 +1,39 @@
+{
+  "excluded_scenarios": [
+    "S07 not run; substituted by S01",
+    "S05 not used for C"
+  ],
+  "notes": [
+    "Equal split is derived from selected-row Delta only.",
+    "No Unweighted QP or Capacity-proportional baseline is run in this builder."
+  ],
+  "processed_outputs": [
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\C_capacity_adjustment_ablation\\table_capacity_adjustment_ablation.csv",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\C_capacity_adjustment_ablation\\table_capacity_adjustment_ablation.md",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\C_capacity_adjustment_ablation\\report_C_capacity_adjustment_ablation.md"
+  ],
+  "raw_sources": [
+    {
+      "path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\one_step\\S02\\gap_rows.csv",
+      "scenario_id": "S02",
+      "source_kind": "generated_one_step_evaluation"
+    },
+    {
+      "path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\one_step\\S06\\gap_rows.csv",
+      "scenario_id": "S06",
+      "source_kind": "generated_one_step_evaluation"
+    },
+    {
+      "path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\one_step\\S01\\gap_rows.csv",
+      "scenario_id": "S01",
+      "source_kind": "generated_one_step_evaluation"
+    },
+    {
+      "path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\one_step\\S08\\gap_rows.csv",
+      "scenario_id": "S08",
+      "source_kind": "generated_one_step_evaluation"
+    }
+  ],
+  "run_id": "icus_v1",
+  "section": "C_capacity_adjustment_ablation"
+}

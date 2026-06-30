@@ -166,9 +166,9 @@ ICUS 建议三条贡献：
 ```text
 1. A mainline-disturbance-aware cooperative gap development formulation is introduced for on-ramp merging, where boundary-vehicle cooperation is treated as bounded and costly rather than free.
 
-2. An adjacent-gap-preserving cooperation capacity model and a space-sensitive convex adjustment optimization are developed to expand candidate gaps with reduced mainline disturbance.
+2. An adjacent-gap-preserving cooperation capacity model and a space-sensitive weighted quadratic adjustment are developed to estimate the minimum necessary cooperation for each candidate gap under neighboring-gap safety margins.
 
-3. A disturbance-efficiency integrated valuation is proposed to select the best developed gap, followed by flexible terminal time/location determination and closed-form feasible trajectory generation.
+3. A disturbance-efficiency valuation is proposed to select the best developed gap, followed by terminal time/location determination and closed-form feasible trajectory generation.
 ```
 
 中文对应：
@@ -176,9 +176,9 @@ ICUS 建议三条贡献：
 ```text
 1. 提出主线扰动感知的协作 gap development 问题表述，将边界车辆协作视为有限且有代价的资源。
 
-2. 提出基于相邻 gap 余量的协作能力约束模型和空间敏感凸优化调整方法，以较低主线扰动扩张候选 gap。
+2. 提出基于相邻 gap 余量的协作能力约束模型和空间敏感二次调整方法，在相邻安全余量约束下估计每个候选 gap 的最小必要协作。
 
-3. 提出扰动-效率联合 gap 评分与选择机制，并进一步确定灵活合流时空点与闭式可行轨迹。
+3. 提出扰动-效率联合 developed-gap valuation 与选择机制，并进一步确定合流时空点与闭式可行轨迹。
 ```
 
 ---
@@ -240,21 +240,41 @@ Without explicitly pricing bounded mainline cooperation, a merging planner may s
 | 主线协作为什么不是免费资源？ | gap development 会消耗边界车速度、位置和相邻空间余量 | Problem Formulation |
 | 当前不足的 gap 是否必须舍弃？ | 不一定，可通过有限边界车辆协作发展为安全 gap | Adjacent-Gap-Preserving Cooperation Capacity |
 | 主线边界车最多能帮多少？ | 由相邻 gap 余量决定 `delta_f_bar,i` 和 `delta_r_bar,i` | Adjacent-Gap-Preserving Cooperation Capacity |
-| gap 缺口应由谁承担？ | 通过空间敏感 QP 最小化候选级协作扰动 | Space-Sensitive Cooperative Adjustment |
-| 多个发展候选如何比较？ | 先估计最小协作代价和 MV 合流代价，再联合评分选择发展后的最优 gap | Disturbance-Efficiency Gap Valuation |
-| 被选中的 gap 如何执行？ | gap 中心偏移决定 `d_i`，进一步确定 `t_m,i*`, `p_m,i`, `x_m(t)` | Terminal Time/Location and Trajectory |
+| gap 缺口应由谁承担？ | 通过空间敏感 QP 最小化候选级协作扰动 | Space-Sensitive Minimum-Disturbance Adjustment |
+| 多个发展候选如何比较？ | 先估计最小协作代价和 MV 合流代价，再联合评分选择发展后的最优 gap | Disturbance-Efficiency Valuation for Developed Gaps |
+| 被选中的 gap 如何执行？ | gap 中心偏移决定 `d_i`，进一步确定 `t_m,i*`, `p_m,i`, `x_m(t)` | Terminal Time, Merging Location, and Feasible Trajectory |
 
 ---
 
 ## 7. Introduction 到实验的证据钩子
 
-| Introduction 主张 | 实验证据 |
-|---|---|
-| 当前不足 gap 不应直接舍弃 | Feasibility / gap development case |
-| 主线协作能力不是固定或无限资源 | 相邻 gap 余量实验 |
-| gap development 应最小化主线扰动 | 空间敏感 QP 消融 |
-| 最优 gap 不一定最近、最大或 ego 最省力 | 扰动-效率联合评分实验 |
-| 被选中 gap 可转化为实际轨迹 | 轨迹、速度、加速度可行性图 |
+Introduction 不需要提前堆具体 scenario 编号，而应把实验组织成三层证据。这样写的好处是，Introduction 只承诺本文真实能支撑的结果，不把 D 节误写成所有场景都保持相近 physical merge timing。
+
+| Evidence layer | 对应实验 | 支撑的 Introduction claim | 写作边界 |
+|---|---|---|---|
+| Closed-chain feasibility | B. Feasibility Validation | candidate gaps can be evaluated as developable resources；selected developed gap can be converted into terminal time, merging location, and feasible trajectory | 不写外部性能优越性 |
+| Mechanism ablation | C. Capacity and Adjustment Ablation | adjacent-gap capacity and space-sensitive QP allocate cooperation according to neighboring-gap margins | 不写完整系统消融，也不写真实交通全局最优 |
+| Representative external comparison | D. External Algorithm Comparison | representative successful-merging cases show reduced mainline disturbance relative to FIFO | 只有 primary representative case 可写 nearly identical physical merge timing；其他 cases 可写 disturbance-efficiency tradeoff |
+
+推荐英文 evidence hook：
+
+```text
+The experiments first validate the feasibility of the developed-gap execution chain, then examine the intended behavior of the capacity and adjustment mechanisms, and finally compare the proposed method with a FIFO baseline in representative successful-merging cases to evaluate mainline disturbance reduction.
+```
+
+若需要提 timing，只能加限定句：
+
+```text
+In the primary representative case, the disturbance reduction is achieved with nearly identical physical merge timing.
+```
+
+Introduction 不写：
+
+```text
+all scenarios maintain comparable merge timing；
+the proposed method is always faster than FIFO；
+internal scenario IDs such as S01/S02 as rhetorical labels。
+```
 
 ---
 
@@ -264,5 +284,4 @@ ICUS Introduction 要聚焦一句话：
 
 > 本文不是提出一个全局合流调度系统，而是提出一种主线扰动感知的 cooperative gap development and valuation 方法，用最小必要主线协作代价发展候选 gap，并选择发展后的最优 gap 执行合流。
 
-写作时最容易出错的是把故事重新带回“候选 gap 搜索”或“长时域 rolling 协调”。这些内容应留给论文2，不要让 ICUS 的 Introduction 承担未来论文的任务。
-
+写作时最容易出错的是两件事：一是把故事重新带回“候选 gap 搜索”或“长时域 rolling 协调”；二是把外部对比写成所有场景都在 physical merge timing 上与 FIFO 相近。前者应留给论文2，后者超出了当前 D 节证据。ICUS Introduction 只需要承诺三层证据：feasibility、mechanism behavior 和 representative lower mainline disturbance。

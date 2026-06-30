@@ -1,0 +1,60 @@
+{
+  "excluded_scenarios": [
+    "S07 not run; front-side preference is represented by S01 in this task",
+    "S05 not used for D; not representative successful merging evidence"
+  ],
+  "notes": [
+    "D reports candidates and rationale only; it does not automatically pick the prettiest result."
+  ],
+  "processed_outputs": [
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\D_external_algorithm_comparison\\table_external_comparison_candidates.csv",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\D_external_algorithm_comparison\\table_external_comparison_candidates.md",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\D_external_algorithm_comparison\\selected_scenarios_rationale.md",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\D_external_algorithm_comparison\\figure_index.md",
+    "D:\\PycharmProjects\\ICUS\\experiment_evidence\\D_external_algorithm_comparison\\report_D_external_algorithm_comparison.md"
+  ],
+  "raw_sources": [
+    {
+      "canonical_path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S01",
+      "comparison_trajectory_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S01\\comparison_trajectory.csv",
+      "metrics_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S01\\metrics.csv",
+      "scenario_id": "S01",
+      "source_kind": "manual_s01_reused",
+      "source_path": "D:\\PycharmProjects\\CORMC\\artifacts\\onestep_algorithm_comparison\\manual_s01\\S01"
+    },
+    {
+      "canonical_path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S02",
+      "comparison_trajectory_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S02\\comparison_trajectory.csv",
+      "metrics_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S02\\metrics.csv",
+      "scenario_id": "S02",
+      "source_kind": "generated_external_comparison",
+      "source_path": null
+    },
+    {
+      "canonical_path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S03",
+      "comparison_trajectory_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S03\\comparison_trajectory.csv",
+      "metrics_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S03\\metrics.csv",
+      "scenario_id": "S03",
+      "source_kind": "generated_external_comparison",
+      "source_path": null
+    },
+    {
+      "canonical_path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S06",
+      "comparison_trajectory_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S06\\comparison_trajectory.csv",
+      "metrics_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S06\\metrics.csv",
+      "scenario_id": "S06",
+      "source_kind": "generated_external_comparison",
+      "source_path": null
+    },
+    {
+      "canonical_path": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S08",
+      "comparison_trajectory_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S08\\comparison_trajectory.csv",
+      "metrics_csv": "D:\\PycharmProjects\\CORMC\\artifacts\\icus论文实验 raw artifacts\\shared_runs\\icus_v1\\external_comparison\\S08\\metrics.csv",
+      "scenario_id": "S08",
+      "source_kind": "generated_external_comparison",
+      "source_path": null
+    }
+  ],
+  "run_id": "icus_v1",
+  "section": "D_external_algorithm_comparison"
+}
