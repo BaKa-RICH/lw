@@ -37,24 +37,357 @@ keyword one, keyword two, keyword three, keyword four
 \end{IEEEkeywords}
 
 \section{Introduction}
-Describe the research background, motivation, and the core problem addressed
-by this paper. A sample citation looks like this \cite{placeholder_article}.
+The introduction will be completed after the citation support bank and the
+compact related-work argument are finalized. A temporary placeholder citation
+is retained only to keep the BibTeX build valid before verified references are
+added \cite{placeholder_article}.
 
-\section{Related Work}
-Summarize the most relevant prior work and explain how your paper differs
-from existing approaches.
+\section{Problem Formulation}
+Consider a local on-ramp merging decision at a planning instant. The target
+mainline lane contains longitudinal vehicle positions
+\(X=[x_1,\ldots,x_N]\), sorted in increasing order, and the merging vehicle
+(MV) is located at \(x_m(0)\). Mainline vehicles are initially assumed to travel
+at a reference speed \(v_{ref}\). The planner evaluates the candidate gaps
+formed by adjacent target-lane vehicles. The \(i\)-th candidate gap is
+\begin{equation}
+    \mathrm{gap}_i=[x_{r,i},x_{f,i}],\quad
+    G_i=x_{f,i}-x_{r,i},\quad
+    c_i=\frac{x_{r,i}+x_{f,i}}{2},
+    \label{eq:gap_definition}
+\end{equation}
+where \(x_{r,i}\) and \(x_{f,i}\) denote the rear and front boundary vehicles,
+respectively, \(G_i\) is the current gap length, and \(c_i\) is the current
+gap center.
 
-\section{Method}
-Present the proposed method, system design, or theoretical analysis.
+Two safety lengths are distinguished. The required merging gap for inserting
+the MV is
+\begin{equation}
+    G^{\mathrm{req}}=2D_h+l_m,
+    \label{eq:required_gap}
+\end{equation}
+where \(D_h\) is the longitudinal safety headway and \(l_m\) is the MV length.
+The adjacent-gap protection threshold is
+\begin{equation}
+    G^{\mathrm{adj}}=D_h+l_m.
+    \label{eq:adjacent_gap}
+\end{equation}
+The former specifies the target gap size needed for a safe merge, while the
+latter prevents boundary-vehicle cooperation from compressing neighboring
+mainline gaps below a safety margin. Therefore, a candidate gap is not removed
+only because \(G_i<G^{\mathrm{req}}\). Instead, its required shortage is
+\begin{equation}
+    \Delta_i=\max(0,G^{\mathrm{req}}-G_i).
+    \label{eq:gap_shortage}
+\end{equation}
+
+The cooperation adjustment of candidate gap \(i\) is described by two
+nonnegative quantities: \(\delta_{f,i}\), the forward displacement of the
+front boundary vehicle, and \(\delta_{r,i}\), the backward displacement of the
+rear boundary vehicle. These adjustments enlarge the target gap by
+\(\delta_{f,i}+\delta_{r,i}\), but they also consume neighboring-gap margins
+and thus are treated as bounded and costly mainline cooperation. The method
+therefore estimates, for each candidate gap, a minimum necessary mainline
+cooperation cost \(C_i^{\mathrm{coop}}\) and an MV ego merging cost
+\(C_i^{\mathrm{ego}}\). The selected developed gap minimizes the integrated
+valuation
+\begin{equation}
+    J_i=w_c C_i^{\mathrm{coop}}+w_e C_i^{\mathrm{ego}},
+    \label{eq:abstract_score}
+\end{equation}
+subject to gap safety, neighboring-gap capacity, and MV kinematic constraints,
+including
+\begin{equation}
+    v_{\min}\leq v_m(t)\leq v_{\max},\qquad
+    a_{\min}\leq a_m(t)\leq a_{\max}.
+\end{equation}
+
+This formulation focuses on a single MV at one merging decision instant. The
+target-lane positions are assumed to be available from perception,
+communication, or the experimental scenario, and the boundary vehicles of a
+candidate gap are assumed to be cooperative CAVs. A basic kinematic reachability
+check may be applied before valuation to avoid physically unreachable gaps, but
+reachability is only a screening condition in this paper. Multi-MV rolling
+coordination, stochastic traffic generation, mixed CAV/HDV response, lane-change
+gap supply, and closed-loop traffic simulation are outside the scope of the
+present ICUS formulation.
+
+\section{Mainline-Disturbance-Aware Cooperative Gap Development}
+The proposed planner decomposes the local problem into four steps. First, it
+computes how much each boundary vehicle can safely contribute while preserving
+adjacent gaps. Second, it estimates the minimum necessary adjustment for each
+candidate gap through a space-sensitive convex problem. Third, it scores all
+developed candidates by combining mainline cooperation cost and MV ego cost.
+Finally, it executes only the selected developed gap by generating the boundary
+adjustment and the MV trajectory.
+
+\subsection{Adjacent-Gap-Preserving Cooperation Capacity}
+For an interior candidate gap \(\mathrm{gap}_i=[x_i,x_{i+1}]\), the adjacent
+mainline gaps are \(G_{i-1}=x_i-x_{i-1}\) and
+\(G_{i+1}=x_{i+2}-x_{i+1}\). When the front boundary vehicle moves forward, it
+compresses the front-side neighboring gap. When the rear boundary vehicle moves
+backward, it compresses the rear-side neighboring gap. Hence, the maximum safe
+cooperation capacities are defined as
+\begin{equation}
+    \bar{\delta}_{f,i}=\max(0,G_{i+1}-G^{\mathrm{adj}}),
+    \qquad
+    \bar{\delta}_{r,i}=\max(0,G_{i-1}-G^{\mathrm{adj}}).
+    \label{eq:capacity}
+\end{equation}
+These bounds are state-dependent: a boundary vehicle can contribute more only
+when the adjacent gap on its outside has sufficient residual margin.
+
+Candidate gap \(i\) can be developed into a safe merging gap by longitudinal
+boundary-vehicle cooperation only if
+\begin{equation}
+    \bar{\delta}_{f,i}+\bar{\delta}_{r,i}\geq \Delta_i.
+    \label{eq:coop_feasibility}
+\end{equation}
+The cooperatively developable set is then
+\begin{equation}
+    \mathcal{G}_{\mathrm{coop}}
+    =
+    \left\{
+    i\,\middle|\,
+    \bar{\delta}_{f,i}+\bar{\delta}_{r,i}\geq \Delta_i
+    \right\}.
+    \label{eq:coop_set}
+\end{equation}
+If \(\Delta_i=0\), the current gap already satisfies the required merging
+length and the minimum cooperation estimate is
+\(\delta_{f,i}^*=\delta_{r,i}^*=0\).
+
+\subsection{Space-Sensitive Minimum-Disturbance Adjustment}
+For a developable candidate gap with \(\Delta_i>0\), the shortage should be
+allocated to the two boundary vehicles with minimum mainline disturbance. The
+space-sensitive weights are
+\begin{equation}
+    \gamma_{f,i}
+    =
+    \left(\frac{\delta_{ref}}{\bar{\delta}_{f,i}}\right)^q,
+    \qquad
+    \gamma_{r,i}
+    =
+    \left(\frac{\delta_{ref}}{\bar{\delta}_{r,i}}\right)^q,
+    \label{eq:gamma}
+\end{equation}
+for positive capacities. A smaller residual neighboring-gap margin leads to a
+larger weight, so the optimization naturally avoids consuming the tighter side.
+The candidate-level cooperation estimate is obtained from
+\begin{align}
+    \min_{\delta_{f,i},\delta_{r,i}}\quad
+    C_i^{\mathrm{coop}}
+    &=
+    \gamma_{f,i}\delta_{f,i}^2+
+    \gamma_{r,i}\delta_{r,i}^2
+    \label{eq:coop_qp}\\
+    \mathrm{s.t.}\quad
+    \delta_{f,i}+\delta_{r,i}&\geq \Delta_i, \notag\\
+    0\leq \delta_{f,i}&\leq \bar{\delta}_{f,i}, \notag\\
+    0\leq \delta_{r,i}&\leq \bar{\delta}_{r,i}. \notag
+\end{align}
+Because the objective increases with the adjustment magnitudes, the optimum
+satisfies \(\delta_{f,i}+\delta_{r,i}=\Delta_i\). Thus, the two-dimensional
+problem admits a one-dimensional projected solution. Define
+\begin{equation}
+    L_i=\max(0,\Delta_i-\bar{\delta}_{r,i}),\qquad
+    U_i=\min(\bar{\delta}_{f,i},\Delta_i),
+    \label{eq:projection_bounds}
+\end{equation}
+and the unconstrained weighted split
+\begin{equation}
+    \delta_{f,i}^{\mathrm{raw}}
+    =
+    \frac{\gamma_{r,i}}{\gamma_{f,i}+\gamma_{r,i}}\Delta_i.
+    \label{eq:raw_split}
+\end{equation}
+With \(\Pi_{[L_i,U_i]}(\cdot)\) denoting projection onto
+\([L_i,U_i]\), the closed-form estimate is
+\begin{equation}
+    \delta_{f,i}^*
+    =
+    \Pi_{[L_i,U_i]}(\delta_{f,i}^{\mathrm{raw}}),
+    \qquad
+    \delta_{r,i}^*
+    =
+    \Delta_i-\delta_{f,i}^*.
+    \label{eq:projected_solution}
+\end{equation}
+These quantities are candidate-level estimates used for valuation; no physical
+adjustment is applied before the best developed gap is selected.
+
+\subsection{Disturbance-Efficiency Valuation for Developed Gaps}
+The adjustment estimate shifts the center of the developed candidate gap by
+\begin{equation}
+    \Delta c_i=\frac{\delta_{f,i}^*-\delta_{r,i}^*}{2}.
+    \label{eq:center_shift}
+\end{equation}
+Consequently, the MV must match the terminal displacement
+\begin{equation}
+    d_i=c_i+\frac{\delta_{f,i}^*-\delta_{r,i}^*}{2}-x_m(0).
+    \label{eq:terminal_displacement}
+\end{equation}
+If the front boundary contributes more, the developed gap center moves forward;
+if the rear boundary contributes more, the developed gap center moves backward.
+This center shift links mainline cooperation to the MV ego trajectory cost.
+
+For each developed candidate, the cooperation cost is
+\begin{equation}
+    C_i^{\mathrm{coop}}
+    =
+    \gamma_{f,i}(\delta_{f,i}^*)^2+
+    \gamma_{r,i}(\delta_{r,i}^*)^2.
+    \label{eq:coop_cost}
+\end{equation}
+Using the terminal time rule in the next subsection, the MV ego cost is
+\begin{equation}
+    C_i^{\mathrm{ego}}
+    =
+    \frac{K d_i^2}{(t_{m,i}^*)^3}
+    +
+    w_t t_{m,i}^*,
+    \qquad
+    K=\frac{120}{7}.
+    \label{eq:ego_cost}
+\end{equation}
+The disturbance-efficiency score is
+\begin{equation}
+    J_i
+    =
+    w_c C_i^{\mathrm{coop}}
+    +
+    w_e C_i^{\mathrm{ego}}.
+    \label{eq:valuation}
+\end{equation}
+The best developed gap is selected by
+\begin{equation}
+    i^*
+    =
+    \underset{i\in\mathcal{G}_{\mathrm{coop}}}{\arg\min}\;J_i.
+    \label{eq:selected_gap}
+\end{equation}
+The order is important: all candidates are first estimated and scored, then
+\(i^*\) is selected, and only the selected gap is executed.
+
+\subsection{Terminal Time, Merging Location, and Feasible Trajectory}
+The candidate terminal time is computed from a fifth-order smooth transition
+\begin{equation}
+    S(\tau)=10\tau^3-15\tau^4+6\tau^5,\qquad
+    \tau=\frac{t}{t_m},
+    \label{eq:smooth_function}
+\end{equation}
+which satisfies zero relative velocity and acceleration at both ends. The
+unconstrained energy-time tradeoff gives
+\begin{equation}
+    t_{m,i}^{0}
+    =
+    \left(\frac{3K d_i^2}{w_t}\right)^{1/4}.
+    \label{eq:t_unconstrained}
+\end{equation}
+Let \(a_{\lim}=\min(a_{\max},|a_{\min}|)\). Since
+\(\max_{\tau\in[0,1]}|S''(\tau)|=10/\sqrt{3}\), the acceleration constraint
+requires
+\begin{equation}
+    t_{a,i}
+    =
+    \sqrt{
+    \frac{\frac{10}{\sqrt{3}}|d_i|}{a_{\lim}}
+    }.
+    \label{eq:t_acc}
+\end{equation}
+The velocity constraint uses \(S'_{\max}=1.875\), yielding
+\begin{equation}
+    t_{v,i}
+    =
+    \begin{cases}
+    \dfrac{1.875|d_i|}{v_{\max}-v_{ref}}, & d_i\geq 0,\\[8pt]
+    \dfrac{1.875|d_i|}{v_{ref}-v_{\min}}, & d_i<0.
+    \end{cases}
+    \label{eq:t_vel}
+\end{equation}
+The final candidate terminal time and merging location are
+\begin{equation}
+    t_{m,i}^*
+    =
+    \max(t_{m,i}^{0},t_{a,i},t_{v,i}),
+    \qquad
+    p_{m,i}=x_m(0)+v_{ref}t_{m,i}^*+d_i.
+    \label{eq:terminal_time_location}
+\end{equation}
+
+After \(i^*\) is selected, define
+\begin{align}
+    d^*&=d_{i^*},&
+    t_m^*&=t_{m,i^*}^*,&
+    p_m^*&=p_{m,i^*}, \notag\\
+    \delta_f^*&=\delta_{f,i^*}^*,&
+    \delta_r^*&=\delta_{r,i^*}^*. \label{eq:selected_quantities}
+\end{align}
+For \(0\leq t\leq t_m^*\), the MV trajectory is
+\begin{align}
+    x_m(t)
+    &=
+    x_m(0)+v_{ref}t+
+    d^*S\left(\frac{t}{t_m^*}\right), \label{eq:mv_position}\\
+    v_m(t)
+    &=
+    v_{ref}
+    +
+    \frac{d^*}{t_m^*}
+    S'\left(\frac{t}{t_m^*}\right), \label{eq:mv_velocity}\\
+    a_m(t)
+    &=
+    \frac{d^*}{(t_m^*)^2}
+    S''\left(\frac{t}{t_m^*}\right). \label{eq:mv_acc}
+\end{align}
+The selected rear and front boundary vehicles follow
+\begin{align}
+    x_r(t)
+    &=
+    x_r^*+v_{ref}t-
+    \delta_r^*S\left(\frac{t}{t_m^*}\right), \label{eq:rear_traj}\\
+    x_f(t)
+    &=
+    x_f^*+v_{ref}t+
+    \delta_f^*S\left(\frac{t}{t_m^*}\right), \label{eq:front_traj}
+\end{align}
+where \(x_r^*=x_{r,i^*}\) and \(x_f^*=x_{f,i^*}\). Therefore, the selected
+gap length evolves as
+\begin{equation}
+    G^*(t)
+    =
+    G_{i^*}
+    +
+    (\delta_f^*+\delta_r^*)
+    S\left(\frac{t}{t_m^*}\right),
+    \label{eq:dynamic_gap}
+\end{equation}
+and at the terminal time
+\begin{equation}
+    G^*(t_m^*)=G_{i^*}+\delta_f^*+\delta_r^*
+    \geq G^{\mathrm{req}}.
+    \label{eq:terminal_gap}
+\end{equation}
+The developed gap center is
+\begin{equation}
+    c^*(t)
+    =
+    c_{i^*}+v_{ref}t+
+    \frac{\delta_f^*-\delta_r^*}{2}
+    S\left(\frac{t}{t_m^*}\right),
+    \label{eq:dynamic_center}
+\end{equation}
+so \(c^*(t_m^*)=p_m^*\). Thus, the selected developed gap is converted into a
+terminal time, terminal position, and feasible MV trajectory while maintaining
+the required developed gap length.
 
 \section{Experiments}
-Describe the experimental setup, datasets, baselines, and evaluation metrics.
-
-\section{Results and Discussion}
-Report the main results and discuss their meaning, strengths, and limitations.
+The experiments section will be drafted after the S01 candidate evaluation
+table, capacity-ablation table, and representative FIFO comparison data are
+assembled.
 
 \section{Conclusion}
-Summarize the paper and mention possible future work.
+The conclusion will be completed after the method and experimental evidence are
+fully aligned.
 
 \section*{Acknowledgment}
 If you do not need acknowledgments or funding information, you can delete this
